@@ -7,7 +7,7 @@ import ErrorMiddleware from "./middlewares/errorMiddleware.js";
 
 
 // import routes
-import userRoutes from "./routes/userRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
 import postRoutes from "./routes/postRoutes.js";
 
 const app = new express();
@@ -40,7 +40,7 @@ app.listen(process.env.PORT, () => {
 
 
 // routes
-app.use('/api/v1', userRoutes);
+app.use('/api/v1', authRoutes);
 app.use('/api/v1', postRoutes);
 
 
