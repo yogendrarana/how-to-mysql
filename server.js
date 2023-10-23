@@ -21,7 +21,6 @@ const __dirname = path.dirname(__filename)
 // set view engine
 app.set('view engine', 'ejs');
 app.set('views', 'views');
-app.use(express.static(path.join(__dirname, './public')));
 
 
 // dot env
@@ -32,8 +31,10 @@ dotenv.config({path: '.env'})
 app.use(express.json())
 app.use(cookieParser())
 app.use(express.urlencoded({ extended: true }))
+app.use(express.static(path.join(__dirname, 'public')))
 
 
+// listen
 app.listen(process.env.PORT, () => {
     console.log('Server listening on port 8000')
 })

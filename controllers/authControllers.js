@@ -1,16 +1,21 @@
-import pool from "../config/db.js";
+import pool from "../config/db/pool.js";
+import User from "../models/userModel.js";
 import ErrorHandler from "../util/errorHandler.js";
 import { catchAsyncError } from "../util/catchAsyncError.js";
 
+
+// instantiate the User class
+const user = new User(pool);
+
+// route handlers
 export const registerUser = catchAsyncError(async (req, res, next) => {
-    const { name, email, password } = req.body;
-    if(!name || !email || !password) return next(new ErrorHandler('Please fill all fields', 400));
+    const { email, password } = req.body;
+    if(!email || !password) return next(new ErrorHandler('Please fill all fields', 400));
 
-    const [rows] = await pool.query('SELECT * FROM user WHERE email = ?', [email]);
-    const user = rows[0];
-    if(user) return next(new ErrorHandler('User already exists', 400));
+    const userExists = await user.getUserByEmail(email);
+    if(userExists) return next(new ErrorHandler('User already exists', 400));
 
-    const [result] = await pool.query('INSERT INTO user (name, email, password) VALUES (?, ?, ?)', [name, email, password]);
+    const [result] = await user.createUser(email, password);
     
     res.status(201).json({ 
         success: true, 
@@ -24,11 +29,10 @@ export const loginUser = catchAsyncError(async (req, res, next) => {
     const { email, password } = req.body;
     if(!email || !password) return next(new ErrorHandler('Please fill all fields', 400));
 
-    const [result] = await pool.query('SELECT * FROM user WHERE email = ?', [email]);
-    const user = result[0];
-    if(!user) return next(new ErrorHandler('Invalid credentials', 401));
+    const userExists = await user.getUserByEmail(email);
+    if(!userExists) return next(new ErrorHandler('Invalid credentials', 401));
 
-    const isMatch = user.password === password;
+    const isMatch = userExists.password === password;
     if(!isMatch) return next(new ErrorHandler('Invalid credentials', 401));
 
     res.status(200).json({ 
